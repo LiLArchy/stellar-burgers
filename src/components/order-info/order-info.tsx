@@ -7,21 +7,38 @@ import { ingredientsSelector } from '../../services/ingredientsSlice';
 import { useParams } from 'react-router-dom';
 import {
   getOrderbyNumber,
-  ordersByNumberSelector
+  ordersByNumberSelector,
+  userOrdersSelector
 } from '../../services/userOrdersSlice';
+import { ordersSelector } from '../../services/feedsSlice';
 
 export const OrderInfo: FC = () => {
   const { number } = useParams();
   const dispatch = useDispatch();
 
+  const feedOrders = useSelector(ordersSelector);
+  const userOrders = useSelector(userOrdersSelector);
+  const ordersByNumber = useSelector(ordersByNumberSelector);
+
+  // Ищем заказ в сторе: сначала в feed orders, затем в user orders, затем в ordersByNumber
+  const orderData = useMemo(() => {
+    if (!number) return undefined;
+    const orderNumber = Number(number);
+    
+    return (
+      feedOrders.find((order) => order.number === orderNumber) ||
+      userOrders.find((order) => order.number === orderNumber) ||
+      ordersByNumber.find((order) => order.number === orderNumber)
+    );
+  }, [number, feedOrders, userOrders, ordersByNumber]);
+
+  // Запрос на сервер только если заказ не найден в сторе
   useEffect(() => {
-    if (number) {
+    if (number && !orderData) {
       dispatch(getOrderbyNumber(Number(number)));
     }
-  }, [number, dispatch]);
+  }, [number, orderData, dispatch]);
 
-  const orders = useSelector(ordersByNumberSelector);
-  const orderData = orders.find((order) => order.number === Number(number));
   const ingredients = useSelector(ingredientsSelector);
 
   /* Готовим данные для отображения */
@@ -70,5 +87,14 @@ export const OrderInfo: FC = () => {
     return <Preloader />;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return (
+    <>
+      {number && (
+        <p className='text text_type_digits-default pb-10'>
+          #{String(number).padStart(6, '0')}
+        </p>
+      )}
+      <OrderInfoUI orderInfo={orderInfo} />
+    </>
+  );
 };

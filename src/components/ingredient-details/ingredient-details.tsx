@@ -14,5 +14,10 @@ export const IngredientDetails: FC = () => {
     return <Preloader />;
   }
 
-  return <IngredientDetailsUI ingredientData={ingredientData} />;
+  return (
+    <>
+      <p className='text text_type_main-large pb-10'>Детали ингредиента</p>
+      <IngredientDetailsUI ingredientData={ingredientData} />
+    </>
+  );
 };
