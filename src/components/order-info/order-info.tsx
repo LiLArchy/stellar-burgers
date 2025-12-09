@@ -24,7 +24,7 @@ export const OrderInfo: FC = () => {
   const orderData = useMemo(() => {
     if (!number) return undefined;
     const orderNumber = Number(number);
-    
+
     return (
       feedOrders.find((order) => order.number === orderNumber) ||
       userOrders.find((order) => order.number === orderNumber) ||
